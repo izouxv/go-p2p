@@ -59,19 +59,21 @@ func (r *PEXReactor) GetChannels() []*ChannelDescriptor {
 // AddPeer implements Reactor by adding peer to the address book (if inbound)
 // or by requesting more addresses (if outbound).
 func (r *PEXReactor) AddPeer(p *Peer) {
-	netAddr := NewNetAddressString(p.ListenAddr)
 	if p.IsOutbound() { // For outbound peers, the address is already in the books
 		if r.book.NeedMoreAddrs() {
 			r.RequestPEX(p)
 		}
 	} else { // For inbound connections, the peer is its own source
-		r.book.AddAddress(netAddr, netAddr)
+		addr := NewNetAddressString(p.ListenAddr)
+		r.book.AddAddress(addr, addr)
 	}
 }
 
 // RemovePeer implements Reactor
 func (r *PEXReactor) RemovePeer(p *Peer, reason interface{}) {
-	// TODO
+	addr := NewNetAddressString(p.ListenAddr)
+	// addr will be ejected from the book
+	r.book.MarkBad(addr)
 }
 
 // Receive implements Reactor by handling incoming PEX messages.

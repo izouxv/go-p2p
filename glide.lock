@@ -1,5 +1,5 @@
-hash: f4a5e917dcd14f8c80bd5f761b3c985856f77d6fb8349d745276884bef456531
-updated: 2017-01-11T13:09:45.523863743Z
+hash: d1d34c21d5dacbbe8865b2ea97ed4947ef7e5ce19e2869c6607baa1cfa6327d7
+updated: 2017-01-11T15:21:58.393671634Z
 imports:
 - name: github.com/btcsuite/btcd
   version: 7c44b6472f58088c8b119ba18915e961966d42d6
@@ -9,12 +9,24 @@ imports:
   version: 637e656429416087660c84436a2a035d69d54e2e
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/mattn/go-colorable
   version: d228849504861217f796da67fae4f6e347643f15
 - name: github.com/mattn/go-isatty
   version: 30a891c33c7cde7b02a981314b4228ec99380cca
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - assert
 - name: github.com/tendermint/ed25519
   version: 1f52c6f8b8a5c7908aff4497c186af344b428925
   subpackages:
