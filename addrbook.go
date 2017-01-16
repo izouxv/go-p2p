@@ -86,7 +86,6 @@ type AddrBook struct {
 	addrLookup        map[string]*knownAddress // new & old
 	addrNew           []map[string]*knownAddress
 	addrOld           []map[string]*knownAddress
-	wg                sync.WaitGroup
 	nOld              int
 	nNew              int
 }
@@ -128,14 +127,13 @@ func (a *AddrBook) init() {
 func (a *AddrBook) OnStart() error {
 	a.BaseService.OnStart()
 	a.loadFromFile(a.filePath)
-	a.wg.Add(1)
 	go a.saveRoutine()
 	return nil
 }
 
 func (a *AddrBook) OnStop() {
 	a.BaseService.OnStop()
-	a.wg.Wait()
+	a.saveToFile(a.filePath)
 }
 
 func (a *AddrBook) AddOurAddress(addr *NetAddress) {
@@ -305,6 +303,8 @@ type addrBookJSON struct {
 }
 
 func (a *AddrBook) saveToFile(filePath string) {
+	log.Info("Saving AddrBook to file", "size", a.Size())
+
 	// Compile Addrs
 	addrs := []*knownAddress{}
 	for _, ka := range a.addrLookup {
@@ -376,7 +376,6 @@ out:
 	for {
 		select {
 		case <-dumpAddressTicker.C:
-			log.Info("Saving AddrBook to file", "size", a.Size())
 			a.saveToFile(a.filePath)
 		case <-a.Quit:
 			break out
@@ -384,7 +383,6 @@ out:
 	}
 	dumpAddressTicker.Stop()
 	a.saveToFile(a.filePath)
-	a.wg.Done()
 	log.Notice("Address handler done")
 }
 
