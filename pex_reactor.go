@@ -7,12 +7,13 @@ import (
 	"reflect"
 	"time"
 
-	. "github.com/tendermint/go-common"
 	wire "github.com/tendermint/go-wire"
 )
 
 const (
+	// PexChannel is a channel for PEX messages
 	PexChannel = byte(0x00)
+
 	// period to ensure peers connected
 	defaultEnsurePeersPeriod = 30 * time.Second
 	minNumOutboundPeers      = 10
@@ -25,6 +26,8 @@ const (
 
 // PEXReactor handles PEX (peer exchange) and ensures that an
 // adequate number of peers are connected to the switch.
+//
+// It uses `AddrBook` (address book) to store `NetAddress`es of the peers.
 type PEXReactor struct {
 	BaseReactor
 
@@ -37,6 +40,7 @@ type PEXReactor struct {
 	maxMsgCountByPeer uint16
 }
 
+// NewPEXReactor creates new PEX reactor.
 func NewPEXReactor(b *AddrBook) *PEXReactor {
 	r := &PEXReactor{
 		book:              b,
@@ -48,6 +52,7 @@ func NewPEXReactor(b *AddrBook) *PEXReactor {
 	return r
 }
 
+// OnStart implements BaseService
 func (r *PEXReactor) OnStart() error {
 	r.BaseReactor.OnStart()
 	go r.ensurePeersRoutine()
@@ -55,6 +60,7 @@ func (r *PEXReactor) OnStart() error {
 	return nil
 }
 
+// OnStop implements BaseService
 func (r *PEXReactor) OnStop() {
 	r.BaseReactor.OnStop()
 }
@@ -83,7 +89,7 @@ func (r *PEXReactor) AddPeer(p *Peer) {
 	}
 }
 
-// RemovePeer implements Reactor
+// RemovePeer implements Reactor by removing peer from the address book.
 func (r *PEXReactor) RemovePeer(p *Peer, reason interface{}) {
 	addr := NewNetAddressString(p.ListenAddr)
 	// addr will be ejected from the book
@@ -119,7 +125,7 @@ func (r *PEXReactor) Receive(chID byte, src *Peer, msgBytes []byte) {
 			r.book.AddAddress(addr, srcAddr)
 		}
 	default:
-		log.Warn(Fmt("Unknown message type %v", reflect.TypeOf(msg)))
+		log.Warn(fmt.Sprintf("Unknown message type %v", reflect.TypeOf(msg)))
 	}
 
 }
@@ -261,6 +267,8 @@ const (
 	msgTypeAddrs   = byte(0x02)
 )
 
+// PexMessage is a primary type for PEX messages. Underneath, it could contain
+// either pexRequestMessage, or pexAddrsMessage messages.
 type PexMessage interface{}
 
 var _ = wire.RegisterInterface(
@@ -269,6 +277,7 @@ var _ = wire.RegisterInterface(
 	wire.ConcreteType{&pexAddrsMessage{}, msgTypeAddrs},
 )
 
+// DecodeMessage implements interface registered above.
 func DecodeMessage(bz []byte) (msgType byte, msg PexMessage, err error) {
 	msgType = bz[0]
 	n := new(int)
