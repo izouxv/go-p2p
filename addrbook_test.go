@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const addrBookStrict = true
@@ -160,4 +162,20 @@ func TestPromoteToOld(t *testing.T) {
 
 	selection := book.GetSelection()
 	t.Logf("selection: %v", selection)
+}
+
+func TestAddrBookRemoveAddress(t *testing.T) {
+	fname := createTempFileName("addrbook_test")
+	book := NewAddrBook(fname, true)
+
+	addr := randIPv4Address()
+	book.AddAddress(addr, addr)
+	assert.Equal(t, 1, book.Size())
+
+	book.RemoveAddress(addr)
+	assert.Equal(t, 0, book.Size())
+
+	nonExistingAddr := randIPv4Address()
+	book.RemoveAddress(nonExistingAddr)
+	assert.Equal(t, 0, book.Size())
 }
